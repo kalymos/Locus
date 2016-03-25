@@ -1,5 +1,18 @@
-//initialisation interupteur generale-------------------------------------------------------------
+//initialisation lcd-------------------------------------------------------------
 
+#include "LedControl.h"
+
+/*
+ Now we need a LedControl to work with.
+ ***** These pin numbers will probably not work with your hardware *****
+ pin 50 is connected to the DataIn
+ pin 52 is connected to the CLK
+ pin 53 is connected to LOAD
+ We have only a single MAX72XX.
+ */
+LedControl lc = LedControl(50, 52, 53, 1);
+
+int keyLed = 0;
 
 //initialisation du clavier ----------------------------------------------------------------------↓
 
@@ -25,7 +38,7 @@ Keypad customKeypad = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS
 boolean codetest[9]={false,false,false,false,false,false,false,false,false}; // flag determining the state of the lock
 boolean isValid=false; // flag determining the validity of an input
 char entryCode[9][4]={    // The code you need 
-    {'1','2','3','4'},
+    {'1','2','3','3'},
     {'4','5','6','6'},
     {'7','8','9','9'},
     {'3','3','2','1'},
@@ -36,8 +49,12 @@ char entryCode[9][4]={    // The code you need
     {'#','9','6','3'},
 };
 
-char inputB[4]={'@','@','@','@'}; // the keypad input buffer
+char inputB[4]={' ',' ',' ',' '}; // the keypad input buffer
 int incremenKeys =0; // incemen keys
+//-------------------------------------------------------------------------------------------------
+
+//initialize global increment
+
 int codetestI=0; //incremen global
 //-----------------------------------------------------------------------------------------------------------
 
@@ -45,18 +62,37 @@ int codetestI=0; //incremen global
 
 #include <SoftwareSerial.h>
 #include "DFPlayer_Mini_Mp3.h"
+
+//----------------------------------------------------------------------------------------------------------
+
+boolean mp=true; //mp3 frist plai
+
 //------------------------------------------------------------------------------------------------------------
+
+//initialize cnc ax
 
 boolean cncAxisX=false;
 boolean cncAxisY=false;
-// set up the device
 
+//-----------------------------------------------------------------------------------------------------------
+
+//initialize nixie tub
+
+int brightness = 0;    // not rectifed bright the  nixie 
+unsigned long tim =0;   //timer
+int bright=0;  // how bright the  nixie is
+int flag=0; //step increment
+int miniNixie=0; //mini bright of nixie
+//-------------------------------------------------------------------------------------------------------
 
 void setup(){
  Serial.begin(9600); // this is added for debugging - allows you to echo the keys to the computer
 
- pinMode(29, INPUT); //on off
+ pinMode(29, INPUT); //on off               
  digitalWrite(29,HIGH); // active pull-upp
+
+ pinMode(44,OUTPUT); //nixie tub
+ digitalWrite(44,LOW); //nixie
 
  pinMode(30,OUTPUT); //SOLENOID  relay
  pinMode(31,OUTPUT); //SOLENOID
@@ -86,12 +122,70 @@ void setup(){
   pinMode(6,OUTPUT); // direction y-axis
 
 
+  /*
+   The MAX72XX is in power-saving mode on startup,
+   we have to do a wakeup call
+   */
+  lc.shutdown(0, false);
+  // Définir la luminosité à une valeur moyenne
+  lc.setIntensity(0, 15);
+  // effacer l'affichage
+  lc.clearDisplay(0);
+  // Afficher 00:00
+  lc.setChar(0, 0, ' ', false);
+  lc.setChar(0, 1, ' ', false);
+  lc.setChar(0, 4, ' ', false);
+  lc.setChar(0, 2, ' ', false);
+  lc.setChar(0, 3, ' ', false);
+  
+
+
 }
 
 void loop(){
   
- if(digitalRead(29)==HIGH)
-  {
+ //if(digitalRead(29)==LOW)  //on-off
+  //{
+    if (tim <= millis()) //nixie routin
+    {
+  
+      if(flag==0){
+        brightness = brightness +40;
+        if(brightness >= 300){
+          flag=1;
+        }
+    
+      }
+        if(flag==1){
+          brightness = brightness -40;
+          if(brightness <= -10){
+            flag=0;
+          }
+          
+        }
+      tim=millis()+300;
+      
+    }
+      bright=brightness;
+    if(bright > 255){
+      bright=255;
+    }
+    if(bright < miniNixie){
+      bright=miniNixie;
+    }
+    
+      analogWrite(44, bright);
+      Serial.println(bright);
+
+//-------------------------------------------------------------------------------------
+    if(mp==true)
+    {
+        mp3_play (1);
+        mp=false;
+    }
+    
+//---------------------------------------------------------------------------------
+    
  
   if(cncAxisX==true)    //rotation serpentin
   {
@@ -120,11 +214,37 @@ void loop(){
 
 
   }
+ //---------------------------------------------------------------------------------
+
 
  char key = customKeypad.getKey(); // get a key (if pressed)
 
  if (key){
  Serial.println(key); // echo to computer fo debugging
+
+     // lcd out 
+
+   if (keyLed == 0){
+    lc.setChar(0, 0, key, false);
+    
+   }
+
+   if (keyLed == 1){
+    lc.setChar(0, 1, key, false);
+    
+   }
+
+   if (keyLed == 2){
+    lc.setChar(0, 2, key, false);
+    
+   }
+
+   if (keyLed == 3){
+    lc.setChar(0, 3, key, false);
+    
+   }
+    
+
 
  if (key=='*') // if '*' check the last four digits are the entry code
  {
@@ -132,6 +252,14 @@ void loop(){
     Serial.println(inputB[1]);
     Serial.println(inputB[2]);
     Serial.println(inputB[3]);
+
+    lc.setChar(0, 0, ' ', false);
+    lc.setChar(0, 1, ' ', false);
+    lc.setChar(0, 4, ' ', false);
+    lc.setChar(0, 2, ' ', false);
+    lc.setChar(0, 3, ' ', false);
+
+
 
  // could do in a loop, but didn't!
     if(inputB[0]==entryCode[codetestI][0] && inputB[1]==entryCode[codetestI][1] && inputB[2]==entryCode[codetestI][2] && inputB[3]==entryCode[codetestI][3] )
@@ -191,12 +319,12 @@ void loop(){
          stage8();
   
        }
-       
-     if(codetest[8]==true)  {
-  
-         stage9();
-  
-       }
+//       
+//     if(codetest[8]==true)  {
+//  
+//         stage9();
+//  
+//       }
 
 
  
@@ -207,31 +335,33 @@ void loop(){
      // a digit has been pressed. First shift the contents of the key buffer along...
        for (incremenKeys =0;incremenKeys <3;incremenKeys ++)
        {
-         inputB[incremenKeys ]=inputB[incremenKeys +1]; // you lose the first key in the buffer doing this
+         inputB[incremenKeys ]=inputB[incremenKeys +1]; // you lose the first key in the buffer doing this$
+         
        }
        inputB[3]=key; // ...then add the new key at the end of the list
+       keyLed++;
    }
  }
- }
+// }
 }
+
+//void stage1 () {
+//  // enclenchement de l'alim principale allumage 2 nixi vu-metre (pwm44)
+//  
+//
+//        
+//
+//          incremenEtReset();
+//
+// 
+//  //       mp3_play (1);
+// //     Serial.println(entryCdePost[0]);
+//        Serial.println("s1");
+//        
+//
+//}
 
 void stage1 () {
-  // enclenchement de l'alim principale allumage 2 nixi vu-metre (pwm44)
-  
-
-        
-
-          incremenEtReset();
-
- 
-         mp3_play (1);
- //     Serial.println(entryCdePost[0]);
-        Serial.println("s1");
-        
-
-}
-
-void stage2 () {
   //mise sous tensin du ionisateur allumage 4 lampe (30), et serpentin (pwm45) rotation serpentin (cncX).
   
 //        codetest[0]=false; ///??
@@ -243,13 +373,13 @@ void stage2 () {
 
           incremenEtReset();
       
-
+         miniNixie=30;
          mp3_play (2);
   //    Serial.println(entryCdePost[0]);
         Serial.println("s2");
 }
 
-void stage3 () {
+void stage2 () {
   //enrichissement de l'environement en oxigen, fumee dan la boite (31)
 
         digitalWrite(31,LOW); //relay 2 fumee
@@ -259,9 +389,11 @@ void stage3 () {
 
  //     Serial.println(entryCdePost[0]);
         Serial.println("s3");
+        miniNixie=30;
+        mp3_play (3);
 }
 
-void stage4 (){
+void stage3 (){
   //allumage du condosateur a particules, allumage sphere a plasma (32), 
 
         digitalWrite(32,LOW); // relay 3 plasma
@@ -274,7 +406,7 @@ void stage4 (){
         Serial.println("s4");
 }
 
-void stage5 () {
+void stage4 () {
   // condensation de l'oxigene en ozone! aspiraton(33).
 
         digitalWrite(33,LOW); //relay 4 ventilo
@@ -288,7 +420,7 @@ void stage5 () {
         Serial.println("s5");
 }
 
-void stage6 () {
+void stage5 () {
   //uverture de la zone de chargement(34), ouverture trappe.
 
         digitalWrite(34,LOW); //relay 5 trappe 1 
@@ -304,7 +436,7 @@ void stage6 () {
         Serial.println("s6");
 }
 
-void stage7 (){
+void stage6 (){
   //ouverture de la trappe a magnetite(35), ouverture de la trappe pour la poudre de fer.
 
         digitalWrite(35,LOW); //relay 6 trappe 2
@@ -316,7 +448,7 @@ void stage7 (){
          mp3_play (7);
 }
 
-void stage8 () {
+void stage7 () {
   //enclenchement du corp de chauffe, lumier rouge sous la plaque de verre(36), elevation aimanter++(cncY).
 
         digitalWrite(36,LOW); //relay 7 trappe 2
@@ -329,7 +461,7 @@ void stage8 () {
          mp3_play (8);
 }
 
-void stage9 () {
+void stage8 () {
   //activatin du rayon ionisateur(37),
 
         digitalWrite(37,LOW); //relay 8 trappe 2
@@ -348,10 +480,10 @@ void incremenEtReset() {
       codetest[codetestI]=false; // reset flag
       codetestI++; // increme global
       
-     inputB[0]='@'; // reset input buffer
-     inputB[1]='@';
-     inputB[2]='@';
-     inputB[3]='@';
+     inputB[0]=' '; // reset input buffer
+     inputB[1]=' ';
+     inputB[2]=' ';
+     inputB[3]=' ';
 
 }
 
