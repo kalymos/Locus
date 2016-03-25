@@ -276,6 +276,7 @@ void loop(){
      {
        codetest[codetestI]=false; // code wrong - set open flag false
        Serial.println("wrong");
+
 //      lc.setChar(0, 0, 'f', false);
 //      lc.setChar(0, 1, 'a', false);
 //      lc.setChar(0, 4, ' ', false);
@@ -285,59 +286,138 @@ void loop(){
      }
 
      if(codetest[0]==true) {
-          stage1();
+        //mise sous tensin du ionisateur allumage 4 lampe (30), et serpentin (pwm45) rotation serpentin (cncX).
+        //stage1();
+        digitalWrite(30,LOW); //relay 1 serpentin 
+        
+        
+        cncAxisX=true;
+        
+        incremenEtReset();
+        
+        miniNixie=30;
+        
+        mp3_play (2);
+        
+        Serial.println("s2");
+        
                  
       }
      if(codetest[1]==true)  {
-  
-         stage2();
+      
+        //enrichissement de l'environement en oxigen, fumee dan la boite (31)
+        //stage2();
+        digitalWrite(31,LOW); //relay 2 fumee
+           
+        incremenEtReset();
+        
+        Serial.println("s3");
+        
+        mp3_play (3);
+
+        miniNixie=50;
   
        }
 
      if(codetest[2]==true)  {
   
-         stage3();
+        //stage3();
+        //allumage du condosateur a particules, allumage sphere a plasma (32), 
+        
+        digitalWrite(32,LOW); // relay 3 plasma
+        //rotation serpentin 
+        
+        incremenEtReset();
+        
+        mp3_play (4);
+        
+        Serial.println("s4");
+
+        miniNixie=70;
   
        }
        
      if(codetest[3]==true)  {
   
-         stage4();
-  
+         //stage4();
+        // condensation de l'oxigene en ozone! aspiraton(33).
+        
+        digitalWrite(33,LOW); //relay 4 ventilo
+        
+        incremenEtReset();
+        
+        mp3_play (5);
+        
+        Serial.println("s5");
+
+        miniNixie=100;
+
        }
 
      if(codetest[4]==true)  {
-  
-         stage5();
+      
+        //stage5();
+        //uverture de la zone de chargement(34), ouverture trappe.
+        
+        digitalWrite(34,LOW); //relay 5 trappe 1 
+        
+        incremenEtReset();
+        
+        mp3_play (6);
+        
+        Serial.println("s6");
+
+        miniNixie=130;
   
        }
 
      if(codetest[5]==true)  {
   
-         stage6();
-  
+        //stage6();
+        //ouverture de la trappe a magnetite(35), ouverture de la trappe pour la poudre de fer.
+        
+        digitalWrite(35,LOW); //relay 6 trappe 2
+        
+        
+        incremenEtReset();
+        
+        
+        mp3_play (7);
+
+        miniNixie=160;
+
        }
 
      if(codetest[6]==true)  {
   
-         stage7();
+        //stage7();
+        //activatin du rayon ionisateur(37),
+        
+        digitalWrite(37,LOW); //relay 8 trappe 2
+        
+        
+        incremenEtReset();
+        
+        mp3_play (8);
+
+        miniNixie=190;
   
        }
 
      if(codetest[7]==true)  {
   
-         stage8();
-  
+        //stage8();
+        //activatin du rayon ionisateur(37),
+        
+        digitalWrite(37,LOW); //relay 8 trappe 2
+        
+        incremenEtReset();
+        
+        mp3_play (9);
+        
+        miniNixie=220;
+
        }
-//       
-//     if(codetest[8]==true)  {
-//  
-//         stage9();
-//  
-//       }
-
-
- 
 
  }
    else
@@ -355,132 +435,7 @@ void loop(){
  }
 }
 
-//void stage1 () {
-//  // enclenchement de l'alim principale allumage 2 nixi vu-metre (pwm44)
-//  
-//
-//        
-//
-//          incremenEtReset();
-//
-// 
-//  //       mp3_play (1);
-// //     Serial.println(entryCdePost[0]);
-//        Serial.println("s1");
-//        
-//
-//}
 
-void stage1 () {
-  //mise sous tensin du ionisateur allumage 4 lampe (30), et serpentin (pwm45) rotation serpentin (cncX).
-  
-//        codetest[0]=false; ///??
-        
-        digitalWrite(30,LOW); //relay 1 serpentin 
-
-        
-        cncAxisX=true;
-
-          incremenEtReset();
-      
-         miniNixie=30;
-         mp3_play (2);
-  //    Serial.println(entryCdePost[0]);
-        Serial.println("s2");
-}
-
-void stage2 () {
-  //enrichissement de l'environement en oxigen, fumee dan la boite (31)
-
-        digitalWrite(31,LOW); //relay 2 fumee
-
-
-          incremenEtReset();
-
- //     Serial.println(entryCdePost[0]);
-        Serial.println("s3");
-        miniNixie=30;
-        mp3_play (3);
-}
-
-void stage3 (){
-  //allumage du condosateur a particules, allumage sphere a plasma (32), 
-
-        digitalWrite(32,LOW); // relay 3 plasma
-         //rotation serpentin 
-
-          incremenEtReset();
-
-         mp3_play (4);
-  //    Serial.println(entryCdePost[0]);
-        Serial.println("s4");
-}
-
-void stage4 () {
-  // condensation de l'oxigene en ozone! aspiraton(33).
-
-        digitalWrite(33,LOW); //relay 4 ventilo
-
-
-          incremenEtReset();
-
-
-         mp3_play (5);
- //     Serial.println(entryCdePost[0]);
-        Serial.println("s5");
-}
-
-void stage5 () {
-  //uverture de la zone de chargement(34), ouverture trappe.
-
-        digitalWrite(34,LOW); //relay 5 trappe 1 
-
-
-          incremenEtReset();
-
-
-  
-
-         mp3_play (6);
-  //    Serial.println(entryCdePost[0]);
-        Serial.println("s6");
-}
-
-void stage6 (){
-  //ouverture de la trappe a magnetite(35), ouverture de la trappe pour la poudre de fer.
-
-        digitalWrite(35,LOW); //relay 6 trappe 2
-
-
-          incremenEtReset();
-  
-
-         mp3_play (7);
-}
-
-void stage7 () {
-  //enclenchement du corp de chauffe, lumier rouge sous la plaque de verre(36), elevation aimanter++(cncY).
-
-        digitalWrite(36,LOW); //relay 7 trappe 2
-        
-
-          incremenEtReset();
-
-          cncAxisY=true;
-
-         mp3_play (8);
-}
-
-void stage8 () {
-  //activatin du rayon ionisateur(37),
-
-        digitalWrite(37,LOW); //relay 8 trappe 2
-
-
-          incremenEtReset();
-
-          mp3_play (9);
-}
 
 
 void incremenEtReset() {
