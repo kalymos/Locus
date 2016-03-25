@@ -85,6 +85,24 @@ int flag=0; //step increment
 int miniNixie=0; //mini bright of nixie
 //-------------------------------------------------------------------------------------------------------
 
+//initalize led cort de chaufe
+
+int brightLed = 0;  // how bright the LED is
+int fadeLed = 5;    // how many points to fade the LED by
+unsigned long timLed =0;   //timer
+boolean ledCort=false;
+
+//-------------------------------------------------------------------------------------------------------
+
+unsigned long timFumee =0;   //timer
+boolean fumee=false;
+
+//-------------------------------------------------------------------------------------------------------
+
+unsigned long timVentilo =0;   //timer
+boolean ventilo=false;
+
+//---------------------------------------------------------------------------------------------------------
 void setup(){
  Serial.begin(9600); // this is added for debugging - allows you to echo the keys to the computer
 
@@ -94,10 +112,14 @@ void setup(){
  pinMode(44,OUTPUT); //nixie tub
  digitalWrite(44,LOW); //nixie
 
- pinMode(30,OUTPUT); //SOLENOID  relay
- pinMode(31,OUTPUT); //SOLENOID
- pinMode(32,OUTPUT); //SOLENOID
- pinMode(33,OUTPUT); //SOLENOID
+ pinMode(45, OUTPUT); //led cort de chofe
+ digitalWrite(44,LOW);
+ 
+
+ pinMode(30,OUTPUT); //relay serpentin
+ pinMode(31,OUTPUT); //relay fumer
+ pinMode(32,OUTPUT); //relay plasme
+ pinMode(33,OUTPUT); //relay ventilo
  pinMode(34,OUTPUT); //SOLENOID
  pinMode(35,OUTPUT); //SOLENOID
  pinMode(36,OUTPUT); //SOLENOID
@@ -153,7 +175,9 @@ void loop(){
   
  if(digitalRead(29)==LOW)  //on-off
   {
-    if (tim <= millis()) //nixie routin
+
+//------------------------------------------------------
+    if (tim <= millis()) //nixie routin pwm
     {
   
       if(flag==0){
@@ -183,7 +207,52 @@ void loop(){
     
       analogWrite(44, bright);
       Serial.println(bright);
+//-----------------------------------------------------------------------------------
+  // pwm led
 
+    if(ledCort == true)
+    {
+      if (timLed <= millis())
+      {
+        // set the brightness 
+        analogWrite(45, brightLed);
+        
+        // change the brightness for next time through the loop:
+        brightLed = brightLed + fadeLed;
+        
+        // reverse the direction of the fading at the ends of the fade:
+        if (brightLed == 0 || brightLed == 255) {
+        fadeLed = -fadeLed ;
+
+        timLed = millis()+200;
+        }
+      }
+    }
+
+//------------------------------------------------------------------------------------
+
+   if (fumee==true)
+    {
+      digitalWrite(31,LOW); //relay 2 fumee
+      
+      if(timFumee<millis()-10000){ //temp de fumer
+        digitalWrite(31,HIGH); //relay 2 fumee
+        fumee=false;
+      }
+    }
+
+//----------------------------------------------------------------------------------------
+
+   if (ventilo==true)
+    {
+      digitalWrite(33,LOW); //relay 2 fumee
+      
+      if(timVentilo<millis()-10000){ //temp de fumer
+        digitalWrite(33,HIGH); //relay 2 fumee
+        ventilo=false;
+      }
+    }
+    
 //-------------------------------------------------------------------------------------
     if(mp==true)
     {
@@ -277,11 +346,12 @@ void loop(){
        codetest[codetestI]=false; // code wrong - set open flag false
        Serial.println("wrong");
 
-//      lc.setChar(0, 0, 'f', false);
-//      lc.setChar(0, 1, 'a', false);
-//      lc.setChar(0, 4, ' ', false);
-//      lc.setRow(0, 2, B0111110);
-//      lc.setChar(0, 3, 'h', false);
+      lc.setChar(0, 0, 'f', false);
+      lc.setChar(0, 1, 'a', false);
+      lc.setChar(0, 4, ' ', false);
+      lc.setRow(0, 2, B0111110);
+      lc.setChar(0, 3, 'h', false);
+      keyLed = 0;
        
      }
 
@@ -307,7 +377,10 @@ void loop(){
       
         //enrichissement de l'environement en oxigen, fumee dan la boite (31)
         //stage2();
-        digitalWrite(31,LOW); //relay 2 fumee
+
+        timFumee=millis();
+
+        fumee=true; // fumee 
            
         incremenEtReset();
         
@@ -342,7 +415,9 @@ void loop(){
          //stage4();
         // condensation de l'oxigene en ozone! aspiraton(33).
         
-        digitalWrite(33,LOW); //relay 4 ventilo
+        timVentilo=millis();
+
+        ventilo=true; // fumee 
         
         incremenEtReset();
         
@@ -388,28 +463,31 @@ void loop(){
 
        }
 
-     if(codetest[6]==true)  {
-  
-        //stage7();
-        //activatin du rayon ionisateur(37),
+
+
+     if(codetest[6]==true)   {
+      
+        //stage8();
+        //enclenchement du corp de chauffe, lumier rouge sous la plaque de verre(36), 
         
-        digitalWrite(37,LOW); //relay 8 trappe 2
-        
+//        digitalWrite(36,LOW); //relay 7 trappe 2
+
+        ledCort=true;
         
         incremenEtReset();
         
         mp3_play (8);
 
         miniNixie=190;
-  
-       }
+        
+        }
 
      if(codetest[7]==true)  {
   
-        //stage8();
-        //activatin du rayon ionisateur(37),
+        //stage9();
+        //activatin du rayon ionisateur(37),elevation aimanter++(cncY).
         
-        digitalWrite(37,LOW); //relay 8 trappe 2
+ //       digitalWrite(36,LOW); //relay 8 trappe 2
         
         incremenEtReset();
         
@@ -417,7 +495,16 @@ void loop(){
         
         miniNixie=220;
 
+        cncAxisY=true;
+
        }
+     if (codetest[8]==true) {
+
+      //stage10
+      digitalWrite(30,HIGH); //relay 1 serpentin 
+      cncAxisX=false; //rotation serpentin off
+      
+     }
 
  }
    else
