@@ -166,8 +166,10 @@ void setup(){
  digitalWrite(44,LOW); //nixie
 
  pinMode(45, OUTPUT); //led cort de chofe
- digitalWrite(44,LOW);
- 
+ digitalWrite(45,LOW);
+
+ pinMode(46, OUTPUT); //led rouge
+ digitalWrite(46,LOW);
 
  pinMode(30,OUTPUT); //relay 1.2 serpentin 
  pinMode(31,OUTPUT); //relay 1.2 fumer
@@ -742,6 +744,8 @@ void loop(){
 
         cncAxisY=true;
 
+        digitalWrite(46,HIGH); //led roug
+
        }
      if (codetest[8]==true) {
 
@@ -821,11 +825,11 @@ void incremenEtReset() {
 //      lc.setChar(0, 4, ' ', false);
 //      lc.setChar(0, 2, ' ', false);
 //      lc.setChar(0, 3, ' ', false);
-matrix.writeDigitNum(0,'o');
-matrix.writeDigitNum(1,'o');
-matrix.writeDigitNum(3,'o');
-matrix.writeDigitNum(4,'o');
-
+//matrix.writeDigitNum(0,'o');
+//matrix.writeDigitNum(1,'o');
+//matrix.writeDigitNum(3,'o');
+//matrix.writeDigitNum(4,'o');
+  matrix.print(0000);
   matrix.writeDisplay();
 
       keyLed = 0;
