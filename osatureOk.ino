@@ -73,7 +73,8 @@ boolean mp=true; //mp3 frist plai
 
 boolean cncAxisX=false;
 boolean cncAxisY=false;
-
+boolean cncAxisY2=false;
+int cncAxisY2F=0;
 //-----------------------------------------------------------------------------------------------------------
 
 //initialize nixie tub
@@ -83,6 +84,8 @@ unsigned long tim =0;   //timer
 int bright=0;  // how bright the  nixie is
 int flag=0; //step increment
 int miniNixie=0; //mini bright of nixie
+boolean nixieFlag=true;
+boolean nixieFlag2=false;
 //-------------------------------------------------------------------------------------------------------
 
 //initalize led cort de chaufe
@@ -144,7 +147,7 @@ void setup(){
   pinMode(6,OUTPUT); // direction y-axis
   
   pinMode(38,INPUT); //suitch cnc
-   digitalWrite(38,HIGH); // active pull-upp
+  digitalWrite(38,HIGH); // active pull-upp
   
 //-----------------------------------------------------
 
@@ -175,38 +178,44 @@ void loop(){
   
  if(digitalRead(29)==LOW)  //on-off
   {
+    
+    digitalWrite(37,LOW); //laser double
 
 //------------------------------------------------------
-    if (tim <= millis()) //nixie routin pwm
-    {
-  
-      if(flag==0){
-        brightness = brightness +40;
-        if(brightness >= 300){
-          flag=1;
-        }
+
+    if (nixieFlag ==true){
+      if (tim <= millis()) //nixie routin pwm
+      {
     
-      }
-        if(flag==1){
-          brightness = brightness -40;
-          if(brightness <= -10){
-            flag=0;
+        if(flag==0){
+          brightness = brightness +40;
+          if(brightness >= 300){
+            flag=1;
           }
-          
-        }
-      tim=millis()+300;
       
-    }
-      bright=brightness;
-    if(bright > 255){
-      bright=255;
-    }
-    if(bright < miniNixie){
-      bright=miniNixie;
-    }
-    
+        }
+          if(flag==1){
+            brightness = brightness -40;
+            if(brightness <= -10){
+              flag=0;
+            }
+            
+          }
+        tim=millis()+300;
+        
+      }
+        bright=brightness;
+      if(bright > 255){
+        bright=255;
+      }
+      if(bright < miniNixie){
+        bright=miniNixie;
+      }
+      
       analogWrite(44, bright);
       Serial.println(bright);
+
+    }
 //-----------------------------------------------------------------------------------
   // pwm led
 
@@ -245,7 +254,7 @@ void loop(){
 
    if (ventilo==true)
     {
-      digitalWrite(33,LOW); //relay 2 fumee
+      digitalWrite(33,LOW); //relay 4
       
       if(timVentilo<millis()-10000){ //temp de fumer
         digitalWrite(33,HIGH); //relay 2 fumee
@@ -274,9 +283,13 @@ void loop(){
 
 
   }
+
+  if(digitalRead(38)==HIGH){
+    cncAxisY=false;
+  }
   if(cncAxisY==true)    //elevation plateau
   {
-    if(digitalRead(38)==LOW){
+
     //for(int inc=0; inc<2001; inc++){
      // digitalWrite(8,LOW); // Set Enable low
       digitalWrite(6,HIGH ); // cnc direction y-axis
@@ -284,13 +297,25 @@ void loop(){
       delay(2); // Wait
       digitalWrite(3,LOW); // Output low
       delay(2); // Wait
-//      if(digitalRead(38)==LOW){
-//        cncAxisY=false;
-//      }
-    }
+   }
 
+  if(cncAxisY2==true)    //desante plateau
+  {
 
-  }
+      cncAxisY2F++;
+     // digitalWrite(8,LOW); // Set Enable low
+      digitalWrite(6,LOW ); // cnc direction y-axis
+      digitalWrite(3,HIGH); // Output high
+      delay(2); // Wait
+      digitalWrite(3,LOW); // Output low
+      delay(2); // Wait
+      if(cncAxisY2F>2000)
+      {
+        cncAxisY2=false;
+      }
+   
+   }
+   
  //---------------------------------------------------------------------------------
 
 
@@ -361,6 +386,7 @@ void loop(){
         digitalWrite(30,LOW); //relay 1 serpentin 
         
         
+        
         cncAxisX=true;
         
         incremenEtReset();
@@ -380,7 +406,7 @@ void loop(){
 
         timFumee=millis();
 
-        fumee=true; // fumee 
+        fumee=true; // fumee relay 2
            
         incremenEtReset();
         
@@ -417,7 +443,7 @@ void loop(){
         
         timVentilo=millis();
 
-        ventilo=true; // fumee 
+        ventilo=true; // ventilo relay 4
         
         incremenEtReset();
         
@@ -501,8 +527,34 @@ void loop(){
      if (codetest[8]==true) {
 
       //stage10
+      digitalWrite(36,LOW); //relay 7 laser
+      
+      digitalWrite(37,HIGH); //laser double
+      
       digitalWrite(30,HIGH); //relay 1 serpentin 
       cncAxisX=false; //rotation serpentin off
+
+      digitalWrite(32,HIGH); // relay 3 plasma
+      
+      digitalWrite(34,HIGH);//relay 5 trappe 1
+      
+      digitalWrite(36,HIGH); //relay 5 trappe 1
+
+      mp3_play (10);
+
+      ledCort=false;
+      
+      nixieFlag=false;
+      analogWrite(44, 0);
+
+      timVentilo=millis();
+      ventilo=true;
+      
+      timFumee=millis();
+      fumee=true;
+      
+      cncAxisY2=true;
+      
       
      }
 
