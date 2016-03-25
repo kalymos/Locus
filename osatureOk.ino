@@ -282,7 +282,7 @@ void loop(){
       }
       
       analogWrite(44, bright);
-      Serial.println(bright);
+//      Serial.println(bright);
 
     }
 //-----------------------------------------------------------------------------------
@@ -351,6 +351,7 @@ void loop(){
       
       if(timerLock1<millis()-200){ //temp 
         digitalWrite(34,HIGH); //relay 5 trappe 1
+        
         lock1=false;
       } 
     }
@@ -377,7 +378,10 @@ void loop(){
       
       if(timerLock3<millis()-10000){ //temp 
         contLock3=contLock3+1;
-          if(contLock3 =1){
+        timerLock3=millis();
+        Serial.println(timerLock3);
+        Serial.println(contLock3);
+          if(contLock3 >= 60){
             digitalWrite(40,HIGH); //relay 2 2 trappe 3
             lock3=false;
           }
@@ -751,6 +755,10 @@ void loop(){
       
       cncAxisY2=true;
       
+      matrix.writeDigitNum(0,'o');
+      matrix.writeDigitNum(1,'o');
+      matrix.writeDigitNum(3,'o');
+      matrix.writeDigitNum(4,'o');
       matrix.writeDisplay();
       
       
@@ -802,3 +810,4 @@ matrix.writeDigitNum(4,'o');
       keyLed = 0;
 
 }
+
