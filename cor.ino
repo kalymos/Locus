@@ -138,8 +138,11 @@ boolean laserDouble=false;
 boolean laserDoubleStart=true;
 
 //-------------------------------------------------------------------------------------------------------
-int tmiAfterLock=0;
-bool flagAfterLock=true;
+int tmiAfterLock1=0;
+bool flagAfterLock1=false;
+//--------------------------------------
+int tmiAfterLock2=0;
+bool flagAfterLock2=false;
 //--------------------------------------
 
 //step serpentin
@@ -408,6 +411,40 @@ void loop(){
     digitalWrite(41,HIGH); //ledkey
   }
 //----------------------------------------------------------------------------------
+
+  if(flagAfterLock1==true){
+    if(tmiAfterLock1<millis()-500){
+      
+        mp3_play (6);
+        
+        Serial.println("s6");
+
+        miniNixie=86;
+
+        flagAfterLock1=false;
+
+        incremenEtReset();
+    }
+    
+  }
+
+//----------------------------------------------------------------------------------
+
+  if(flagAfterLock2==true){
+    if(tmiAfterLock2<millis()-500){
+
+        mp3_play (7);
+
+        miniNixie=100;
+
+        flagAfterLock2=false;
+
+        incremenEtReset();          
+    }
+  } 
+
+
+//-----------------------------------------------------------------------------------
     
  
   if(cncAxisX==true)    //rotation serpentin
@@ -649,18 +686,21 @@ void loop(){
       
         //stage5();
         //uverture de la zone de chargement(34), ouverture trappe.
+        flagAfterLock1=true;
+        flagAfterLock1=millis();
 
         digitalWrite(34,HIGH); //relay 1.5 trappe 1
 
-       // delay(250); // Wait
-        
-        incremenEtReset();
-        
-        mp3_play (6);
-        
-        Serial.println("s6");
 
-        miniNixie=86;
+//
+//        incremenEtReset();
+//        
+//        mp3_play (6);
+//        
+//        Serial.println("s6");
+//
+//        miniNixie=86;
+        
   
        }
 
@@ -669,23 +709,17 @@ void loop(){
         //stage6();
         //ouverture de la trappe a magnetite(35), ouverture de la trappe pour la poudre de fer.
 
+        flagAfterLock2=true;
+        flagAfterLock2=millis();
+        
          digitalWrite(35,HIGH); //relay 1.6 trappe 2
          
-         if (flagAfterLock==true){
-          tmiAfterLock=millis()+100;
-          flagAfterLock=false;
-         }
-        
-      //  delay(250); // Wait
-        if (tmiAfterLock <= millis()){       
-          incremenEtReset();
 
-          flagAfterLock=true;
           
-          mp3_play (7);
-  
-          miniNixie=100;
-        }
+//          mp3_play (7);
+//  
+//          miniNixie=100;
+        
 
        }
 
