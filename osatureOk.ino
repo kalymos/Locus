@@ -169,19 +169,19 @@ void setup(){
  digitalWrite(44,LOW);
  
 
- pinMode(30,OUTPUT); //relay serpentin
- pinMode(31,OUTPUT); //relay fumer
- pinMode(32,OUTPUT); //relay plasme
- pinMode(33,OUTPUT); //relay ventilo
- pinMode(34,OUTPUT); //SOLENOID
- pinMode(35,OUTPUT); //SOLENOID
- pinMode(36,OUTPUT); //SOLENOID
- pinMode(37,OUTPUT); //SOLENOID
- pinMode(39,OUTPUT);
- pinMode(40,OUTPUT);
- pinMode(41,OUTPUT);
- pinMode(42,OUTPUT);
- pinMode(43,OUTPUT);
+ pinMode(30,OUTPUT); //relay 1.2 serpentin 
+ pinMode(31,OUTPUT); //relay 1.2 fumer
+ pinMode(32,OUTPUT); //relay 1.3 plasme
+ pinMode(33,OUTPUT); //relay 1.4 ventilo
+ pinMode(34,OUTPUT); //relay 1.5 lock1
+ pinMode(35,OUTPUT); //relay 1.6 lock2
+ pinMode(36,OUTPUT); //relay 1.7 laser rouge
+ pinMode(37,OUTPUT); //relay 1.8 laser double
+ pinMode(39,OUTPUT); //relay 2.1 giro
+ pinMode(40,OUTPUT); //relay 2.2 lock2
+ pinMode(41,OUTPUT); //relay 2.3
+ pinMode(42,OUTPUT); //relay 2.4
+ pinMode(43,OUTPUT); //relay 2.5
  digitalWrite(30,HIGH); // SOLENOID OFF
  digitalWrite(31,HIGH); // SOLENOID OFF
  digitalWrite(32,HIGH); // SOLENOID OFF
@@ -243,15 +243,21 @@ void setup(){
 }
 
 void loop(){
-  
- if(digitalRead(29)==LOW)  //on-off
-  {
-    delay(250);
-    if(digitalRead(29)==LOW)  //on-off
+
+//------------------------------------------------------------------------------
+  if(onOff==false)
     {
-      onOff==true;
-    }
+      if(digitalRead(29)==LOW)  //on-off
+      {
+        delay(250);
+        if(digitalRead(29)==LOW)  //on-off
+        {
+          onOff=true;
+        }
+      }
   }
+
+//-------------------------------------------------------------------------  
  if(onOff==true)
  {   
     if (laserDoubleStart==true)
@@ -323,10 +329,10 @@ void loop(){
 
    if (fumee==true)
     {
-      digitalWrite(31,LOW); //relay 2 fumee
+      digitalWrite(31,LOW); //relay 1.2 fumee
       
-      if(timFumee<millis()-5000){ //temp de fumer
-        digitalWrite(31,HIGH); //relay 2 fumee
+      if(timFumee<millis()-7000){ //temp de fumer
+        digitalWrite(31,HIGH); //relay 1.2 fumee
         fumee=false;
       }
     }
@@ -336,10 +342,10 @@ void loop(){
 
    if (ventilo==true)
     {
-      digitalWrite(33,LOW); //relay 4
+      digitalWrite(33,LOW); //relay 1.4
       
       if(timVentilo<millis()-30000){ //temp de fumer
-        digitalWrite(33,HIGH); //relay 2 fumee
+        digitalWrite(33,HIGH); //relay 1.4
         ventilo=false;
       }
     }
@@ -358,10 +364,10 @@ void loop(){
 
     if (lock1==true)
     {
-      digitalWrite(34,LOW); //relay 5 trappe 1
+      digitalWrite(34,LOW); //relay 1.5 trappe 1
       
       if(timerLock1<millis()-200){ //temp 
-        digitalWrite(34,HIGH); //relay 5 trappe 1
+        digitalWrite(34,HIGH); //relay 1.5 trappe 1
         
         lock1=false;
       } 
@@ -372,10 +378,10 @@ void loop(){
 
     if (lock2==true)
     {
-      digitalWrite(35,LOW); //relay 6 trappe 2
+      digitalWrite(35,LOW); //relay 1.6 trappe 2
       
       if(timerLock2<millis()-2000){ //temp 
-        digitalWrite(35,HIGH); //relay 6 trappe 2
+        digitalWrite(35,HIGH); //relay 1.6 trappe 2
         lock2=false;
       } 
     }
@@ -385,7 +391,7 @@ void loop(){
 
     if (lock3==true)
     {
-      digitalWrite(40,LOW); //relay 2 2 trappe 3
+      digitalWrite(40,LOW); //relay 2.2 trappe 3
       
       if(timerLock3<millis()-10000){ //temp 
         contLock3=contLock3+1;
@@ -416,9 +422,13 @@ void loop(){
 //--------------------------------------------------------------------------------- 
 //routine laser double  
   
-  if(laserDouble=true)
+  if(laserDouble==true)
   {
-    digitalWrite(37,LOW); //laser double
+    digitalWrite(37,LOW); //relay 1.8 laser double 
+  }
+  if(laserDouble==false)
+  {
+    digitalWrite(37,HIGH);
   }
 //----------------------------------------------------------------------------------
     
@@ -585,7 +595,7 @@ void loop(){
      if(codetest[0]==true) {
         //mise sous tensin du ionisateur allumage 4 lampe (30), et serpentin (pwm45) rotation serpentin (cncX).
         //stage1();
-        digitalWrite(30,LOW); //relay 1 serpentin 
+        digitalWrite(30,LOW); //relay 1.1 serpentin 
         
         
         incremenEtReset();
@@ -605,7 +615,7 @@ void loop(){
 
         timFumee=millis();
 
-        fumee=true; // fumee relay 2
+        fumee=true; // fumee relay 1.2
            
         incremenEtReset();
         
@@ -622,7 +632,7 @@ void loop(){
         //stage3();
         //allumage du condosateur a particules, allumage sphere a plasma (32), 
         
-        digitalWrite(32,LOW); // relay 3 plasma
+        digitalWrite(32,LOW); // relay 1.3 plasma
         //rotation serpentin 
         
         cncAxisX=true;
@@ -644,7 +654,7 @@ void loop(){
         
         timVentilo=millis();
 
-        ventilo=true; // ventilo relay 4
+        ventilo=true; // ventilo relay 1.4
         
         incremenEtReset();
         
@@ -661,7 +671,7 @@ void loop(){
         //stage5();
         //uverture de la zone de chargement(34), ouverture trappe.
         
-        lock1=true; //relay 5 trappe 1
+        lock1=true; //relay 1.5 trappe 1
         
         timerLock1=millis();
         
@@ -680,7 +690,7 @@ void loop(){
         //stage6();
         //ouverture de la trappe a magnetite(35), ouverture de la trappe pour la poudre de fer.
         
-        lock2=true; //relay 6 trappe 2
+        lock2=true; //relay 1.6 trappe 2
         
         timerLock2=millis();
         
@@ -736,7 +746,7 @@ void loop(){
      if (codetest[8]==true) {
 
       //stage10
-      digitalWrite(36,LOW); //relay 7 laser
+      digitalWrite(36,LOW); //relay 1.7 laser
       
       timerLock3=millis();
       lock3=true; //relay 2,2 port
