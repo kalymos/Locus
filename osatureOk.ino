@@ -1,16 +1,27 @@
 //initialisation lcd-------------------------------------------------------------
 
-#include "LedControl.h"
+//#include "LedControl.h"
+//
+///*
+// Now we need a LedControl to work with.
+// ***** These pin numbers will probably not work with your hardware *****
+// pin 50 is connected to the DataIn
+// pin 52 is connected to the CLK
+// pin 53 is connected to LOAD
+// We have only a single MAX72XX.
+// */
+//LedControl lc = LedControl(50, 52, 53, 1);
 
-/*
- Now we need a LedControl to work with.
- ***** These pin numbers will probably not work with your hardware *****
- pin 50 is connected to the DataIn
- pin 52 is connected to the CLK
- pin 53 is connected to LOAD
- We have only a single MAX72XX.
- */
-LedControl lc = LedControl(50, 52, 53, 1);
+// Enable one of these two #includes and comment out the other.
+// Conditional #include doesn't work due to Arduino IDE shenanigans.
+#include <Wire.h> // Enable this line if using Arduino Uno, Mega, etc.
+//#include <TinyWireM.h> // Enable this line if using Adafruit Trinket, Gemma, etc.
+
+#include "Adafruit_LEDBackpack.h"
+#include "Adafruit_GFX.h"
+
+Adafruit_7segment matrix = Adafruit_7segment();
+
 
 int keyLed = 0;
 
@@ -195,21 +206,27 @@ void setup(){
   
 //-----------------------------------------------------
 
-  /*
-   The MAX72XX is in power-saving mode on startup,
-   we have to do a wakeup call
-   */
-  lc.shutdown(0, false);
-  // Définir la luminosité à une valeur moyenne
-  lc.setIntensity(0, 15);
-  // effacer l'affichage
-  lc.clearDisplay(0);
-  // Afficher 00:00
-  lc.setChar(0, 0, ' ', false);
-  lc.setChar(0, 1, ' ', false);
-  lc.setChar(0, 4, ' ', false);
-  lc.setChar(0, 2, ' ', false);
-  lc.setChar(0, 3, ' ', false);
+//  /*
+//   The MAX72XX is in power-saving mode on startup,
+//   we have to do a wakeup call
+//   */
+//  lc.shutdown(0, false);
+//  // Définir la luminosité à une valeur moyenne
+//  lc.setIntensity(0, 15);
+//  // effacer l'affichage
+//  lc.clearDisplay(0);
+//  // Afficher 00:00
+//  lc.setChar(0, 0, ' ', false);
+//  lc.setChar(0, 1, ' ', false);
+//  lc.setChar(0, 4, ' ', false);
+//  lc.setChar(0, 2, ' ', false);
+//  lc.setChar(0, 3, ' ', false);
+
+  matrix.begin(0x70);
+  
+  matrix.writeDigitNum(0,'.');
+  matrix.writeDisplay();
+
 //-------------------------------------------------
 //setp serpenti
   // set the speed at 60 rpm:
@@ -264,7 +281,7 @@ void loop(){
       }
       
       analogWrite(44, bright);
-//
+      Serial.println(bright);
 
     }
 //-----------------------------------------------------------------------------------
@@ -390,7 +407,7 @@ void loop(){
  
   if(cncAxisX==true)    //rotation serpentin
   {
-     myStepper.step(stepsPerRevolution); 
+     myStepper.step(-stepsPerRevolution); 
     
 //    digitalWrite(8,LOW); // Set Enable low
 //    digitalWrite(5,HIGH ); // cnc direction y-axis
@@ -445,23 +462,31 @@ void loop(){
      // lcd out 
 
    if (keyLed == 0){
-    lc.setChar(0, 0, key, false);
+//    lc.setChar(0, 0, key, false);
+        matrix.writeDigitNum(0,key);
+        matrix.writeDisplay();
     
    }
 
    if (keyLed == 1){
-    lc.setChar(0, 1, key, false);
+   // lc.setChar(0, 1, key, false);
+        matrix.writeDigitNum(1,key);
+        matrix.writeDisplay();
     
    }
 
    if (keyLed == 2){
-    lc.setChar(0, 2, key, false);
-    
+   // lc.setChar(0, 2, key, false);
+
+        matrix.writeDigitNum(4,key);
+        matrix.writeDisplay();    
    }
 
    if (keyLed == 3){
-    lc.setChar(0, 3, key, false);
-    
+    //lc.setChar(0, 3, key, false);
+
+        matrix.writeDigitNum(5,key);
+        matrix.writeDisplay();    
    }
     
 
@@ -489,11 +514,14 @@ void loop(){
        codetest[codetestI]=false; // code wrong - set open flag false
        Serial.println("wrong");
 
-      lc.setChar(0, 0, 'f', false);
-      lc.setChar(0, 1, 'a', false);
-      lc.setChar(0, 4, ' ', false);
-      lc.setRow(0, 2, B0111110);
-      lc.setChar(0, 3, 'h', false);
+//      lc.setChar(0, 0, 'f', false);
+//      lc.setChar(0, 1, 'a', false);
+//      lc.setChar(0, 4, ' ', false);
+//      lc.setRow(0, 2, B0111110);
+//      lc.setChar(0, 3, 'h', false);
+        matrix.writeDigitNum(0,'.');
+        matrix.writeDisplay();
+
       keyLed = 0;
        
      }
@@ -715,11 +743,18 @@ void incremenEtReset() {
        inputB[2]=' ';
        inputB[3]=' ';
        
-      lc.setChar(0, 0, ' ', false); //reset led
-      lc.setChar(0, 1, ' ', false);
-      lc.setChar(0, 4, ' ', false);
-      lc.setChar(0, 2, ' ', false);
-      lc.setChar(0, 3, ' ', false);
+//      lc.setChar(0, 0, ' ', false); //reset led
+//      lc.setChar(0, 1, ' ', false);
+//      lc.setChar(0, 4, ' ', false);
+//      lc.setChar(0, 2, ' ', false);
+//      lc.setChar(0, 3, ' ', false);
+  matrix.writeDigitNum(0,'.');
+  matrix.writeDigitNum(1,'.');
+  matrix.writeDigitNum(3,'.');
+  matrix.writeDigitNum(4,'.');
+
+  matrix.writeDisplay();
+
       keyLed = 0;
 
 }
