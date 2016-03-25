@@ -46,7 +46,7 @@ int codetestI=0; //incremen global
 //------------------------------------------------------------------------------------------------------------
 
 boolean cncAxisX=false;
-
+boolean cncAxisY=false;
 // set up the device
 void setup(){
  Serial.begin(9600); // this is added for debugging - allows you to echo the keys to the computer
@@ -84,9 +84,9 @@ void setup(){
 
 void loop(){
 
-  if(cncAxisX= true)    
+  if(cncAxisX==true)    //rotation serpentin
   {
-      digitalWrite(8,LOW); // Set Enable low
+    digitalWrite(8,LOW); // Set Enable low
     digitalWrite(5,LOW ); // cnc direction y-axis
     digitalWrite(2,HIGH); // Output high
     delay(2); // Wait
@@ -95,8 +95,22 @@ void loop(){
 
 
   }
+  if(cncAxisY==true)    //elevation plateau
+  {
+    for(int inc=0; inc<2001; inc++){
+     // digitalWrite(8,LOW); // Set Enable low
+      digitalWrite(6,HIGH ); // cnc direction y-axis
+      digitalWrite(3,HIGH); // Output high
+      delay(2); // Wait
+      digitalWrite(3,LOW); // Output low
+      delay(2); // Wait
+      if(inc==2000){
+        cncAxisY=false;
+      }
+    }
 
-  digitalWrite(8,LOW);//cnc set enlabe= LOW
+
+  }
 
  char key = customKeypad.getKey(); // get a key (if pressed)
 
@@ -208,7 +222,7 @@ void stage1 () {
 }
 
 void stage2 () {
-  //mise sous tensin du ionisateur allumage 4 lampe (30), et serpentin (pwm45)
+  //mise sous tensin du ionisateur allumage 4 lampe (30), et serpentin (pwm45) rotation serpentin (cncX).
   
 //        codetest[0]=false; ///??
         
@@ -238,7 +252,7 @@ void stage3 () {
 }
 
 void stage4 (){
-  //allumage du condosateur a particules, allumage sphere a plasma (32), rotation serpentin (cncA).
+  //allumage du condosateur a particules, allumage sphere a plasma (32), 
 
         digitalWrite(32,LOW); // relay 3 plasma
          //rotation serpentin 
@@ -293,13 +307,14 @@ void stage7 (){
 }
 
 void stage8 () {
-  //enclenchement du corp de chauffe, lumier rouge sous la plaque de verre(36), elevation aimanter++(cncB).
+  //enclenchement du corp de chauffe, lumier rouge sous la plaque de verre(36), elevation aimanter++(cncY).
 
         digitalWrite(36,LOW); //relay 7 trappe 2
         
 
           incremenEtReset();
 
+          cncAxisY=true;
 
          mp3_play (8);
 }
