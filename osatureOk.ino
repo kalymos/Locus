@@ -22,8 +22,7 @@ Keypad customKeypad = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS
 
 boolean codetest[9]={false,false,false,false,false,false,false,false,false}; // flag determining the state of the lock
 boolean isValid=false; // flag determining the validity of an input
-///char entryCode[36]={'1','2','3','A','4','5','6','B','7','8','9','C','A','3','2','1','B','6','5','4','C','9','8','7','2','5','8','0','3','6','9','#','A','B','C','D'}; // The code you need 
-char entryCode[9][4]={
+char entryCode[9][4]={    // The code you need 
     {'1','2','3','A'},
     {'4','5','6','B'},
     {'7','8','9','C'},
@@ -36,23 +35,24 @@ char entryCode[9][4]={
 };
 
 char inputB[4]={'@','@','@','@'}; // the keypad input buffer
-int incremenKeys =0;
-int codetestI=0; //increment du loop
-
+int incremenKeys =0; // incemen keys
+int codetestI=0; //incremen global
+//-----------------------------------------------------------------------------------------------------------
 
 //initialize mp3 DFPlayer Mini
 
 #include <SoftwareSerial.h>
 #include "DFPlayer_Mini_Mp3.h"
+//------------------------------------------------------------------------------------------------------------
 
-
+boolean cncAxisX=false;
 
 // set up the device
 void setup(){
  Serial.begin(9600); // this is added for debugging - allows you to echo the keys to the computer
 
 
- pinMode(30,OUTPUT); //SOLENOID 
+ pinMode(30,OUTPUT); //SOLENOID  relay
  pinMode(31,OUTPUT); //SOLENOID
  pinMode(32,OUTPUT); //SOLENOID
  pinMode(33,OUTPUT); //SOLENOID
@@ -73,11 +73,30 @@ void setup(){
  mp3_set_serial (Serial1); //set Serial for DFPlayer-mini mp3 module 
  mp3_set_volume (15);
 
+  pinMode(8,OUTPUT); // Enable cnc schide
+  pinMode(2,OUTPUT); //step puls x-axis
+  pinMode(3,OUTPUT); //step puls y-axis
+  pinMode(5,OUTPUT); // direction x-axis
+  pinMode(6,OUTPUT); // direction y-axis
+
 
 }
 
 void loop(){
 
+  if(cncAxisX= true)    
+  {
+      digitalWrite(8,LOW); // Set Enable low
+    digitalWrite(5,LOW ); // cnc direction y-axis
+    digitalWrite(2,HIGH); // Output high
+    delay(2); // Wait
+    digitalWrite(2,LOW); // Output low
+    delay(2); // Wait
+
+
+  }
+
+  digitalWrite(8,LOW);//cnc set enlabe= LOW
 
  char key = customKeypad.getKey(); // get a key (if pressed)
 
@@ -191,10 +210,12 @@ void stage1 () {
 void stage2 () {
   //mise sous tensin du ionisateur allumage 4 lampe (30), et serpentin (pwm45)
   
-        codetest[0]=false; ///??
+//        codetest[0]=false; ///??
         
         digitalWrite(30,LOW); //relay 1 serpentin 
+
         
+        cncAxisX=true;
 
           incremenEtReset();
       
@@ -299,8 +320,8 @@ void incremenEtReset() {
   
 
 
-      codetest[codetestI]=false;
-      codetestI++;
+      codetest[codetestI]=false; // reset flag
+      codetestI++; // increme global
       
      inputB[0]='@'; // reset input buffer
      inputB[1]='@';
@@ -308,3 +329,4 @@ void incremenEtReset() {
      inputB[3]='@';
 
 }
+
