@@ -38,8 +38,8 @@ Keypad customKeypad = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS
 boolean codetest[9]={false,false,false,false,false,false,false,false,false}; // flag determining the state of the lock
 boolean isValid=false; // flag determining the validity of an input
 char entryCode[9][4]={    // The code you need 
-    {'1','2','3','3'},
-    {'4','5','6','6'},
+    {'1','1','1','1'},
+    {'2','2','2','2'},
     {'7','8','9','9'},
     {'3','3','2','1'},
     {'6','6','5','4'},
@@ -112,10 +112,34 @@ boolean lock1=false;
 
 //---------------------------------------------------------------------------------------------------------
 
-unsigned long timerEment=0;   //timer ement
-boolean ement=false;
+unsigned long timerLock2=0;   //timer lock 2
+boolean lock2=false;
 
 //------------------------------------------------------------------------------------------------------
+
+unsigned long timerLock3=0;   //timer lock 3
+boolean lock3=false;
+
+//------------------------------------------------------------------------------------------------------
+
+unsigned long timerAlarme=0;   //timer alarme
+boolean alarme=false;
+
+//------------------------------------------------------------------------------------------------------
+boolean laserDouble=false;
+boolean laserDoubleStart=true;
+
+//-------------------------------------------------------------------------------------------------------
+//step serpentin
+
+#include <Stepper.h>
+
+const int stepsPerRevolution = 200;  // change this to fit the number of steps per revolution
+// for your motor
+
+Stepper myStepper(stepsPerRevolution, 14, 15, 16, 17);
+
+//-------------------------------------------------------------------------------------------
 void setup(){
  Serial.begin(9600); // this is added for debugging - allows you to echo the keys to the computer
 
@@ -187,7 +211,9 @@ void setup(){
   lc.setChar(0, 2, ' ', false);
   lc.setChar(0, 3, ' ', false);
 //-------------------------------------------------
-
+//setp serpenti
+  // set the speed at 60 rpm:
+  myStepper.setSpeed(60);
 
 //-------------------------------
 
@@ -199,7 +225,11 @@ void loop(){
  if(digitalRead(29)==LOW)  //on-off
   {
     
-    digitalWrite(37,LOW); //laser double
+    if (laserDoubleStart==true)
+    {
+      laserDouble=true;
+      laserDoubleStart=false;
+    }
 
 //------------------------------------------------------
 //nixie routin pwm
@@ -234,7 +264,7 @@ void loop(){
       }
       
       analogWrite(44, bright);
-      Serial.println(bright);
+//
 
     }
 //-----------------------------------------------------------------------------------
@@ -266,7 +296,7 @@ void loop(){
     {
       digitalWrite(31,LOW); //relay 2 fumee
       
-      if(timFumee<millis()-10000){ //temp de fumer
+      if(timFumee<millis()-5000){ //temp de fumer
         digitalWrite(31,HIGH); //relay 2 fumee
         fumee=false;
       }
@@ -279,7 +309,7 @@ void loop(){
     {
       digitalWrite(33,LOW); //relay 4
       
-      if(timVentilo<millis()-10000){ //temp de fumer
+      if(timVentilo<millis()-30000){ //temp de fumer
         digitalWrite(33,HIGH); //relay 2 fumee
         ventilo=false;
       }
@@ -308,29 +338,66 @@ void loop(){
     }
     
 //---------------------------------------------------------------------------------
-//routine ement
+//routine lock2
 
-    if (ement==true)
+    if (lock2==true)
     {
       digitalWrite(35,LOW); //relay 6 trappe 2
       
-      if(timerEment<millis()-200){ //temp 
+      if(timerLock2<millis()-2000){ //temp 
         digitalWrite(35,HIGH); //relay 6 trappe 2
-        ement=false;
+        lock2=false;
       } 
     }
+    
+//---------------------------------------------------------------------------------    
+//routine lock3
 
+    if (lock3==true)
+    {
+      digitalWrite(40,LOW); //relay 2 2 trappe 3
+      
+      if(timerLock3<millis()-200){ //temp 
+        digitalWrite(40,HIGH); //relay 2 2 trappe 3
+        lock3=false;
+      } 
+    }
+    
+//--------------------------------------------------------------------------------- 
+
+//routine alarme
+
+    if (alarme==true)
+    {
+      digitalWrite(40,LOW); //relay 2 2 trappe 3
+      
+      if(timerAlarme<millis()-30000){ //temp 
+        digitalWrite(39,LOW); //relay 2,1 giro
+        mp3_play (10);
+        alarme=false;
+      } 
+    }
+    
+//--------------------------------------------------------------------------------- 
+//routine laser double  
+  
+  if(laserDouble=true)
+  {
+    digitalWrite(37,LOW); //laser double
+  }
 //----------------------------------------------------------------------------------
     
  
   if(cncAxisX==true)    //rotation serpentin
   {
-    digitalWrite(8,LOW); // Set Enable low
-    digitalWrite(5,LOW ); // cnc direction y-axis
-    digitalWrite(2,HIGH); // Output high
-    delay(2); // Wait
-    digitalWrite(2,LOW); // Output low
-    delay(2); // Wait
+     myStepper.step(stepsPerRevolution); 
+    
+//    digitalWrite(8,LOW); // Set Enable low
+//    digitalWrite(5,HIGH ); // cnc direction y-axis
+//    digitalWrite(2,HIGH); // Output high
+//    delay(2); // Wait
+//    digitalWrite(2,LOW); // Output low
+//    delay(2); // Wait
 
 
   }
@@ -343,7 +410,7 @@ void loop(){
 
     //for(int inc=0; inc<2001; inc++){
      // digitalWrite(8,LOW); // Set Enable low
-      digitalWrite(6,HIGH ); // cnc direction y-axis
+      digitalWrite(6,LOW ); // cnc direction y-axis
       digitalWrite(3,HIGH); // Output high
       delay(2); // Wait
       digitalWrite(3,LOW); // Output low
@@ -355,7 +422,7 @@ void loop(){
 
       cncAxisY2F++;
      // digitalWrite(8,LOW); // Set Enable low
-      digitalWrite(6,LOW ); // cnc direction y-axis
+      digitalWrite(6,HIGH ); // cnc direction y-axis
       digitalWrite(3,HIGH); // Output high
       delay(2); // Wait
       digitalWrite(3,LOW); // Output low
@@ -530,9 +597,9 @@ void loop(){
         //stage6();
         //ouverture de la trappe a magnetite(35), ouverture de la trappe pour la poudre de fer.
         
-        ement=true; //relay 6 trappe 2
+        lock2=true; //relay 6 trappe 2
         
-        timerEment=millis();
+        timerLock2=millis();
         
         delay(10); // Wait
                 
@@ -571,7 +638,10 @@ void loop(){
         
         incremenEtReset();
         
-        digitalWrite(37,LOW);//relay 2,1 giro
+      //  digitalWrite(37,LOW);//relay 2,1 giro
+        alarme=true; //relay 6 trappe 2
+        
+        timerAlarme=millis();
         
         mp3_play (9);
         
@@ -585,8 +655,9 @@ void loop(){
       //stage10
       digitalWrite(36,LOW); //relay 7 laser
       
-      digitalWrite(40,LOW); //relay 2,2 port
+      lock3=true; //relay 2,2 port
       
+      laserDouble=false;
       digitalWrite(37,HIGH); //laser double
       
       digitalWrite(30,HIGH); //relay 1 serpentin 
@@ -594,9 +665,10 @@ void loop(){
 
       digitalWrite(32,HIGH); // relay 3 plasma
       
-      digitalWrite(37,HIGH); //relay 2,1 giro
+      digitalWrite(39,HIGH); //relay 2,1 giro
 
       ledCort=false;
+      analogWrite(45, 0);
       
       nixieFlag=false;
       analogWrite(44, 0);
