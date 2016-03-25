@@ -1,3 +1,5 @@
+//initialisation interupteur generale-------------------------------------------------------------
+
 
 //initialisation du clavier ----------------------------------------------------------------------↓
 
@@ -5,16 +7,16 @@
 
 int postKey = 0;
 const byte ROWS = 4; //four rows
-const byte COLS = 4; //four columns
+const byte COLS = 3; //four columns
 //define the cymbols on the buttons of the keypads
 char hexaKeys[ROWS][COLS] = {
-  {'1','2','3','A'},
-  {'4','5','6','B'},
-  {'7','8','9','C'},
-  {'*','0','#','D'}
+  {'1','2','3'},
+  {'4','5','6'},
+  {'7','8','9'},
+  {'*','0','#'}
 };
 byte rowPins[ROWS] = {22, 24, 26, 28}; //connect to the row pinouts of the keypad
-byte colPins[COLS] = {23, 25, 27, 29}; //connect to the column pinouts of the keypad
+byte colPins[COLS] = {23, 25, 27}; //connect to the column pinouts of the keypad
 //-------------------------------------------------------------------------------------------------↑̛
 
 //initialize an instance of class NewKeypad
@@ -23,15 +25,15 @@ Keypad customKeypad = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS
 boolean codetest[9]={false,false,false,false,false,false,false,false,false}; // flag determining the state of the lock
 boolean isValid=false; // flag determining the validity of an input
 char entryCode[9][4]={    // The code you need 
-    {'1','2','3','A'},
-    {'4','5','6','B'},
-    {'7','8','9','C'},
-    {'A','3','2','1'},
-    {'B','6','5','4'},
-    {'C','9','8','7'},
+    {'1','2','3','4'},
+    {'4','5','6','6'},
+    {'7','8','9','9'},
+    {'3','3','2','1'},
+    {'6','6','5','4'},
+    {'9','9','8','7'},
     {'2','5','8','0'},
     {'3','6','9','#'},
-    {'A','B','C','D'},
+    {'#','9','6','3'},
 };
 
 char inputB[4]={'@','@','@','@'}; // the keypad input buffer
@@ -48,9 +50,13 @@ int codetestI=0; //incremen global
 boolean cncAxisX=false;
 boolean cncAxisY=false;
 // set up the device
+
+
 void setup(){
  Serial.begin(9600); // this is added for debugging - allows you to echo the keys to the computer
 
+ pinMode(29, INPUT); //on off
+ digitalWrite(29,HIGH); // active pull-upp
 
  pinMode(30,OUTPUT); //SOLENOID  relay
  pinMode(31,OUTPUT); //SOLENOID
@@ -83,7 +89,10 @@ void setup(){
 }
 
 void loop(){
-
+  
+ if(digitalRead(29)==HIGH)
+  {
+ 
   if(cncAxisX==true)    //rotation serpentin
   {
     digitalWrite(8,LOW); // Set Enable low
@@ -202,6 +211,7 @@ void loop(){
        }
        inputB[3]=key; // ...then add the new key at the end of the list
    }
+ }
  }
 }
 
