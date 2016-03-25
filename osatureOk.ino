@@ -110,17 +110,21 @@ void setup(){
  digitalWrite(35,HIGH); // SOLENOID OFF
  digitalWrite(36,HIGH); // SOLENOID OFF
  digitalWrite(37,HIGH); // SOLENOID OFF
-
+//----------------------------------------------------
  Serial1.begin (9600);
  mp3_set_serial (Serial1); //set Serial for DFPlayer-mini mp3 module 
  mp3_set_volume (15);
-
+//-----------------------------------------------------
   pinMode(8,OUTPUT); // Enable cnc schide
   pinMode(2,OUTPUT); //step puls x-axis
   pinMode(3,OUTPUT); //step puls y-axis
   pinMode(5,OUTPUT); // direction x-axis
   pinMode(6,OUTPUT); // direction y-axis
-
+  
+  pinMode(38,INPUT); //suitch cnc
+   digitalWrite(38,HIGH); // active pull-upp
+  
+//-----------------------------------------------------
 
   /*
    The MAX72XX is in power-saving mode on startup,
@@ -137,15 +141,18 @@ void setup(){
   lc.setChar(0, 4, ' ', false);
   lc.setChar(0, 2, ' ', false);
   lc.setChar(0, 3, ' ', false);
-  
+//-------------------------------------------------
+
+
+//-------------------------------
 
 
 }
 
 void loop(){
   
- //if(digitalRead(29)==LOW)  //on-off
-  //{
+ if(digitalRead(29)==LOW)  //on-off
+  {
     if (tim <= millis()) //nixie routin
     {
   
@@ -200,16 +207,17 @@ void loop(){
   }
   if(cncAxisY==true)    //elevation plateau
   {
-    for(int inc=0; inc<2001; inc++){
+    if(digitalRead(38)==LOW){
+    //for(int inc=0; inc<2001; inc++){
      // digitalWrite(8,LOW); // Set Enable low
       digitalWrite(6,HIGH ); // cnc direction y-axis
       digitalWrite(3,HIGH); // Output high
       delay(2); // Wait
       digitalWrite(3,LOW); // Output low
       delay(2); // Wait
-      if(inc==2000){
-        cncAxisY=false;
-      }
+//      if(digitalRead(38)==LOW){
+//        cncAxisY=false;
+//      }
     }
 
 
@@ -253,11 +261,7 @@ void loop(){
     Serial.println(inputB[2]);
     Serial.println(inputB[3]);
 
-    lc.setChar(0, 0, ' ', false);
-    lc.setChar(0, 1, ' ', false);
-    lc.setChar(0, 4, ' ', false);
-    lc.setChar(0, 2, ' ', false);
-    lc.setChar(0, 3, ' ', false);
+
 
 
 
@@ -266,11 +270,17 @@ void loop(){
     {
        codetest[codetestI]=true; // code ok - set open flag true
       Serial.println("ok");
+
     }
      else
      {
        codetest[codetestI]=false; // code wrong - set open flag false
        Serial.println("wrong");
+//      lc.setChar(0, 0, 'f', false);
+//      lc.setChar(0, 1, 'a', false);
+//      lc.setChar(0, 4, ' ', false);
+//      lc.setRow(0, 2, B0111110);
+//      lc.setChar(0, 3, 'h', false);
        
      }
 
@@ -342,7 +352,7 @@ void loop(){
        keyLed++;
    }
  }
-// }
+ }
 }
 
 //void stage1 () {
@@ -480,10 +490,17 @@ void incremenEtReset() {
       codetest[codetestI]=false; // reset flag
       codetestI++; // increme global
       
-     inputB[0]=' '; // reset input buffer
-     inputB[1]=' ';
-     inputB[2]=' ';
-     inputB[3]=' ';
+       inputB[0]=' '; // reset input buffer
+       inputB[1]=' ';
+       inputB[2]=' ';
+       inputB[3]=' ';
+       
+      lc.setChar(0, 0, ' ', false); //reset led
+      lc.setChar(0, 1, ' ', false);
+      lc.setChar(0, 4, ' ', false);
+      lc.setChar(0, 2, ' ', false);
+      lc.setChar(0, 3, ' ', false);
+      keyLed = 0;
 
 }
 
