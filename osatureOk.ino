@@ -97,15 +97,25 @@ boolean ledCort=false;
 
 //-------------------------------------------------------------------------------------------------------
 
-unsigned long timFumee =0;   //timer
+unsigned long timFumee =0;   //timer fumee
 boolean fumee=false;
 
 //-------------------------------------------------------------------------------------------------------
 
-unsigned long timVentilo =0;   //timer
+unsigned long timVentilo =0;   //timer ventilo
 boolean ventilo=false;
 
 //---------------------------------------------------------------------------------------------------------
+
+unsigned long timerLock1=0;   //timer lock 1
+boolean lock1=false;
+
+//---------------------------------------------------------------------------------------------------------
+
+unsigned long timerEment=0;   //timer ement
+boolean ement=false;
+
+//------------------------------------------------------------------------------------------------------
 void setup(){
  Serial.begin(9600); // this is added for debugging - allows you to echo the keys to the computer
 
@@ -127,6 +137,11 @@ void setup(){
  pinMode(35,OUTPUT); //SOLENOID
  pinMode(36,OUTPUT); //SOLENOID
  pinMode(37,OUTPUT); //SOLENOID
+ pinMode(39,OUTPUT);
+ pinMode(40,OUTPUT);
+ pinMode(41,OUTPUT);
+ pinMode(42,OUTPUT);
+ pinMode(43,OUTPUT);
  digitalWrite(30,HIGH); // SOLENOID OFF
  digitalWrite(31,HIGH); // SOLENOID OFF
  digitalWrite(32,HIGH); // SOLENOID OFF
@@ -135,6 +150,11 @@ void setup(){
  digitalWrite(35,HIGH); // SOLENOID OFF
  digitalWrite(36,HIGH); // SOLENOID OFF
  digitalWrite(37,HIGH); // SOLENOID OFF
+ digitalWrite(39,HIGH);
+ digitalWrite(40,HIGH);
+ digitalWrite(41,HIGH);
+ digitalWrite(42,HIGH);
+ digitalWrite(43,HIGH);
 //----------------------------------------------------
  Serial1.begin (9600);
  mp3_set_serial (Serial1); //set Serial for DFPlayer-mini mp3 module 
@@ -182,9 +202,10 @@ void loop(){
     digitalWrite(37,LOW); //laser double
 
 //------------------------------------------------------
+//nixie routin pwm
 
     if (nixieFlag ==true){
-      if (tim <= millis()) //nixie routin pwm
+      if (tim <= millis()) 
       {
     
         if(flag==0){
@@ -239,6 +260,7 @@ void loop(){
     }
 
 //------------------------------------------------------------------------------------
+// routine funee
 
    if (fumee==true)
     {
@@ -251,6 +273,7 @@ void loop(){
     }
 
 //----------------------------------------------------------------------------------------
+// rourtine vabntilo
 
    if (ventilo==true)
     {
@@ -263,13 +286,41 @@ void loop(){
     }
     
 //-------------------------------------------------------------------------------------
+// routinr mp3
+
     if(mp==true)
     {
         mp3_play (1);
         mp=false;
     }
+
+//---------------------------------------------------------------------------------
+//routine lock1
+
+    if (lock1==true)
+    {
+      digitalWrite(34,LOW); //relay 5 trappe 1
+      
+      if(timerLock1<millis()-200){ //temp 
+        digitalWrite(34,HIGH); //relay 5 trappe 1
+        lock1=false;
+      } 
+    }
     
 //---------------------------------------------------------------------------------
+//routine ement
+
+    if (ement==true)
+    {
+      digitalWrite(35,LOW); //relay 6 trappe 2
+      
+      if(timerEment<millis()-200){ //temp 
+        digitalWrite(35,HIGH); //relay 6 trappe 2
+        ement=false;
+      } 
+    }
+
+//----------------------------------------------------------------------------------
     
  
   if(cncAxisX==true)    //rotation serpentin
@@ -460,7 +511,9 @@ void loop(){
         //stage5();
         //uverture de la zone de chargement(34), ouverture trappe.
         
-        digitalWrite(34,LOW); //relay 5 trappe 1 
+        lock1=true; //relay 5 trappe 1
+        
+        timerLock1=millis();
         
         incremenEtReset();
         
@@ -477,9 +530,12 @@ void loop(){
         //stage6();
         //ouverture de la trappe a magnetite(35), ouverture de la trappe pour la poudre de fer.
         
-        digitalWrite(35,LOW); //relay 6 trappe 2
+        ement=true; //relay 6 trappe 2
         
+        timerEment=millis();
         
+        delay(10); // Wait
+                
         incremenEtReset();
         
         
@@ -496,7 +552,6 @@ void loop(){
         //stage8();
         //enclenchement du corp de chauffe, lumier rouge sous la plaque de verre(36), 
         
-//        digitalWrite(36,LOW); //relay 7 trappe 2
 
         ledCort=true;
         
@@ -513,9 +568,10 @@ void loop(){
         //stage9();
         //activatin du rayon ionisateur(37),elevation aimanter++(cncY).
         
- //       digitalWrite(36,LOW); //relay 8 trappe 2
         
         incremenEtReset();
+        
+        digitalWrite(37,LOW);//relay 2,1 giro
         
         mp3_play (9);
         
@@ -529,6 +585,8 @@ void loop(){
       //stage10
       digitalWrite(36,LOW); //relay 7 laser
       
+      digitalWrite(40,LOW); //relay 2,2 port
+      
       digitalWrite(37,HIGH); //laser double
       
       digitalWrite(30,HIGH); //relay 1 serpentin 
@@ -536,11 +594,7 @@ void loop(){
 
       digitalWrite(32,HIGH); // relay 3 plasma
       
-      digitalWrite(34,HIGH);//relay 5 trappe 1
-      
-      digitalWrite(36,HIGH); //relay 5 trappe 1
-
-      mp3_play (10);
+      digitalWrite(37,HIGH); //relay 2,1 giro
 
       ledCort=false;
       
