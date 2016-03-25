@@ -53,15 +53,15 @@ Keypad customKeypad = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS
 boolean codetest[9]={false,false,false,false,false,false,false,false,false}; // flag determining the state of the lock
 boolean isValid=false; // flag determining the validity of an input
 char entryCode[9][4]={    // The code you need 
-    {'2','2','1','8'},
-    {'8','7','6','4'},
+    {'2','2','1','8'}, //code 1
+    {'8','7','6','4'},  //code 2
     {'1','9','2','1'},
     {'8','5','3','4'},
     {'5','1','0','9'},
     {'1','7','0','2'},
     {'1','3','1','2'},
     {'0','6','6','6'},
-    {'3','2','1','0'},
+    {'3','2','1','0'}, //code 9
 };
 
 char inputB[4]={' ',' ',' ',' '}; // the keypad input buffer
@@ -90,6 +90,7 @@ boolean cncAxisX=false;
 boolean cncAxisY=false;
 boolean cncAxisY2=false;
 int cncAxisY2F=0;
+
 //-----------------------------------------------------------------------------------------------------------
 
 //initialize nixie tub
@@ -120,15 +121,6 @@ boolean fumee=false;
 unsigned long timVentilo =0;   //timer ventilo
 boolean ventilo=false;
 
-//---------------------------------------------------------------------------------------------------------
-
-unsigned long timerLock1=0;   //timer lock 1
-boolean lock1=false;
-
-//---------------------------------------------------------------------------------------------------------
-
-unsigned long timerLock2=0;   //timer lock 2
-boolean lock2=false;
 
 //------------------------------------------------------------------------------------------------------
 
@@ -146,14 +138,18 @@ boolean laserDouble=false;
 boolean laserDoubleStart=true;
 
 //-------------------------------------------------------------------------------------------------------
+int tmiAfterLock=0;
+bool flagAfterLock=true;
+//--------------------------------------
+
 //step serpentin
 
-#include <Stepper.h>
-
-const int stepsPerRevolution = 200;  // change this to fit the number of steps per revolution
-// for your motor
-
-Stepper myStepper(stepsPerRevolution, 14, 15, 16, 17);
+//#include <Stepper.h>
+//
+//const int stepsPerRevolution = 200;  // change this to fit the number of steps per revolution
+//// for your motor
+//
+//Stepper myStepper(stepsPerRevolution, 14, 15, 16, 17);
 
 //-------------------------------------------------------------------------------------------
 void setup(){
@@ -171,7 +167,7 @@ void setup(){
  pinMode(46, OUTPUT); //led rouge
  digitalWrite(46,LOW);
 
- pinMode(30,OUTPUT); //relay 1.2 serpentin 
+ pinMode(30,OUTPUT); //relay 1.1 serpentin 
  pinMode(31,OUTPUT); //relay 1.2 fumer
  pinMode(32,OUTPUT); //relay 1.3 plasme
  pinMode(33,OUTPUT); //relay 1.4 ventilo
@@ -181,15 +177,15 @@ void setup(){
  pinMode(37,OUTPUT); //relay 1.8 laser double
  pinMode(39,OUTPUT); //relay 2.1 giro
  pinMode(40,OUTPUT); //relay 2.2 lock2
- pinMode(41,OUTPUT); //relay 2.3
+ pinMode(41,OUTPUT); //relay 2.3 ledKey
  pinMode(42,OUTPUT); //relay 2.4
  pinMode(43,OUTPUT); //relay 2.5
  digitalWrite(30,HIGH); // SOLENOID OFF
  digitalWrite(31,HIGH); // SOLENOID OFF
  digitalWrite(32,HIGH); // SOLENOID OFF
  digitalWrite(33,HIGH); // SOLENOID OFF
- digitalWrite(34,HIGH); // SOLENOID OFF
- digitalWrite(35,HIGH); // SOLENOID OFF
+ digitalWrite(34,LOW); // SOLENOID OFF
+ digitalWrite(35,LOW); // SOLENOID OFF
  digitalWrite(36,HIGH); // SOLENOID OFF
  digitalWrite(37,HIGH); // SOLENOID OFF
  digitalWrite(39,HIGH);
@@ -237,10 +233,9 @@ void setup(){
 //-------------------------------------------------
 //setp serpenti
   // set the speed at 60 rpm:
-  myStepper.setSpeed(60);
+//  myStepper.setSpeed(60);
 
 //-------------------------------
-
 
 }
 
@@ -269,6 +264,7 @@ void loop(){
     }
 
 //------------------------------------------------------
+
 //nixie routin pwm
 
     if (nixieFlag ==true){
@@ -361,32 +357,7 @@ void loop(){
         mp=false;
     }
 
-//---------------------------------------------------------------------------------
-//routine lock1
 
-    if (lock1==true)
-    {
-      digitalWrite(34,LOW); //relay 1.5 trappe 1
-      
-      if(timerLock1<millis()-200){ //temp 
-        digitalWrite(34,HIGH); //relay 1.5 trappe 1
-        
-        lock1=false;
-      } 
-    }
-    
-//---------------------------------------------------------------------------------
-//routine lock2
-
-    if (lock2==true)
-    {
-      digitalWrite(35,LOW); //relay 1.6 trappe 2
-      
-      if(timerLock2<millis()-2000){ //temp 
-        digitalWrite(35,HIGH); //relay 1.6 trappe 2
-        lock2=false;
-      } 
-    }
     
 //---------------------------------------------------------------------------------    
 //routine lock3
@@ -427,25 +398,31 @@ void loop(){
   if(laserDouble==true)
   {
     digitalWrite(37,LOW); //relay 1.8 laser double 
+
+    digitalWrite(41,LOW); //relay 2.3ledkey
   }
   if(laserDouble==false)
   {
     digitalWrite(37,HIGH);
+
+    digitalWrite(41,HIGH); //ledkey
   }
 //----------------------------------------------------------------------------------
     
  
   if(cncAxisX==true)    //rotation serpentin
   {
-
+    
     
     digitalWrite(8,LOW); // Set Enable low
     digitalWrite(5,HIGH ); // cnc direction y-axis
     digitalWrite(2,HIGH); // Output high
     delay(2); // Wait
+   // timAxX=millis();
+    //if (timAxX <= millis() +2){
     digitalWrite(2,LOW); // Output low
     delay(2); // Wait
-
+    //}
 
   }
 
@@ -672,10 +649,10 @@ void loop(){
       
         //stage5();
         //uverture de la zone de chargement(34), ouverture trappe.
-        
-        lock1=true; //relay 1.5 trappe 1
-        
-        timerLock1=millis();
+
+        digitalWrite(34,HIGH); //relay 1.5 trappe 1
+
+       // delay(250); // Wait
         
         incremenEtReset();
         
@@ -691,19 +668,24 @@ void loop(){
   
         //stage6();
         //ouverture de la trappe a magnetite(35), ouverture de la trappe pour la poudre de fer.
-        
-        lock2=true; //relay 1.6 trappe 2
-        
-        timerLock2=millis();
-        
-        delay(10); // Wait
-                
-        incremenEtReset();
-        
-        
-        mp3_play (7);
 
-        miniNixie=100;
+         digitalWrite(35,HIGH); //relay 1.6 trappe 2
+         
+         if (flagAfterLock==true){
+          tmiAfterLock=millis()+100;
+          flagAfterLock=false;
+         }
+        
+      //  delay(250); // Wait
+        if (tmiAfterLock <= millis()){       
+          incremenEtReset();
+
+          flagAfterLock=true;
+          
+          mp3_play (7);
+  
+          miniNixie=100;
+        }
 
        }
 
@@ -747,6 +729,7 @@ void loop(){
         digitalWrite(46,HIGH); //led roug
 
        }
+       
      if (codetest[8]==true) {
 
       //stage10
@@ -757,7 +740,7 @@ void loop(){
       
       laserDouble=false;
       
-      digitalWrite(37,HIGH); //laser double
+    //  digitalWrite(37,HIGH); //laser double
       
       digitalWrite(30,HIGH); //relay 1 serpentin 
       cncAxisX=false; //rotation serpentin off
@@ -765,6 +748,10 @@ void loop(){
       digitalWrite(32,HIGH); // relay 3 plasma
       
       digitalWrite(39,HIGH); //relay 2,1 giro
+
+     // digitalWrite(41,HIGH); //led keypad
+
+      digitalWrite(46,LOW); //led roug
 
       ledCort=false;
       analogWrite(45, 0);
