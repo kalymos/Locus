@@ -1,3 +1,7 @@
+//inti flag on off--------------------------------------------------------------------
+
+boolean onOff=false;
+
 //initialisation lcd-------------------------------------------------------------
 
 //#include "LedControl.h"
@@ -49,15 +53,15 @@ Keypad customKeypad = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS
 boolean codetest[9]={false,false,false,false,false,false,false,false,false}; // flag determining the state of the lock
 boolean isValid=false; // flag determining the validity of an input
 char entryCode[9][4]={    // The code you need 
-    {'1','2','3','3'},
-    {'4','5','6','6'},
-    {'7','8','9','9'},
-    {'3','3','2','1'},
-    {'6','6','5','4'},
-    {'9','9','8','7'},
-    {'2','5','8','0'},
-    {'3','6','9','#'},
-    {'#','9','6','3'},
+    {'2','2','1','8'},
+    {'8','7','6','4'},
+    {'1','9','2','1'},
+    {'8','5','3','4'},
+    {'5','1','0','9'},
+    {'1','7','0','2'},
+    {'1','3','1','2'},
+    {'0','6','6','6'},
+    {'3','2','1','0'},
 };
 
 char inputB[4]={' ',' ',' ',' '}; // the keypad input buffer
@@ -242,7 +246,14 @@ void loop(){
   
  if(digitalRead(29)==LOW)  //on-off
   {
-    
+    delay(250);
+    if(digitalRead(29)==LOW)  //on-off
+    {
+      onOff==true;
+    }
+  }
+ if(onOff==true)
+ {   
     if (laserDoubleStart==true)
     {
       laserDouble=true;
@@ -730,7 +741,7 @@ void loop(){
       timerLock3=millis();
       lock3=true; //relay 2,2 port
       
-      laserDoubleStart=false;
+      laserDouble=false;
       
       digitalWrite(37,HIGH); //laser double
       
