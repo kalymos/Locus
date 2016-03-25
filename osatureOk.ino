@@ -414,14 +414,14 @@ void loop(){
  
   if(cncAxisX==true)    //rotation serpentin
   {
-     myStepper.step(-stepsPerRevolution); 
+
     
-//    digitalWrite(8,LOW); // Set Enable low
-//    digitalWrite(5,HIGH ); // cnc direction y-axis
-//    digitalWrite(2,HIGH); // Output high
-//    delay(2); // Wait
-//    digitalWrite(2,LOW); // Output low
-//    delay(2); // Wait
+    digitalWrite(8,LOW); // Set Enable low
+    digitalWrite(5,HIGH ); // cnc direction y-axis
+    digitalWrite(2,HIGH); // Output high
+    delay(2); // Wait
+    digitalWrite(2,LOW); // Output low
+    delay(2); // Wait
 
 
   }
@@ -614,7 +614,7 @@ void loop(){
         digitalWrite(32,LOW); // relay 3 plasma
         //rotation serpentin 
         
-        // cncAxisX=true;
+        cncAxisX=true;
         
         incremenEtReset();
         
