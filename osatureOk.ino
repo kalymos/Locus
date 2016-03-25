@@ -22,7 +22,7 @@
 
 Adafruit_7segment matrix = Adafruit_7segment();
 
-
+int keyOut =0;
 int keyLed = 0;
 
 //initialisation du clavier ----------------------------------------------------------------------↓
@@ -49,8 +49,8 @@ Keypad customKeypad = Keypad( makeKeymap(hexaKeys), rowPins, colPins, ROWS, COLS
 boolean codetest[9]={false,false,false,false,false,false,false,false,false}; // flag determining the state of the lock
 boolean isValid=false; // flag determining the validity of an input
 char entryCode[9][4]={    // The code you need 
-    {'1','1','1','1'},
-    {'2','2','2','2'},
+    {'1','2','3','3'},
+    {'4','5','6','6'},
     {'7','8','9','9'},
     {'3','3','2','1'},
     {'6','6','5','4'},
@@ -130,6 +130,7 @@ boolean lock2=false;
 
 unsigned long timerLock3=0;   //timer lock 3
 boolean lock3=false;
+int contLock3=0;
 
 //------------------------------------------------------------------------------------------------------
 
@@ -224,7 +225,7 @@ void setup(){
 
   matrix.begin(0x70);
   
-  matrix.writeDigitNum(0,'.');
+  //matrix.writeDigitNum(0,1);
   matrix.writeDisplay();
 
 //-------------------------------------------------
@@ -257,7 +258,7 @@ void loop(){
     
         if(flag==0){
           brightness = brightness +40;
-          if(brightness >= 300){
+          if(brightness >= 240){
             flag=1;
           }
       
@@ -273,8 +274,8 @@ void loop(){
         
       }
         bright=brightness;
-      if(bright > 255){
-        bright=255;
+      if(bright > 200){
+        bright=140;
       }
       if(bright < miniNixie){
         bright=miniNixie;
@@ -374,9 +375,12 @@ void loop(){
     {
       digitalWrite(40,LOW); //relay 2 2 trappe 3
       
-      if(timerLock3<millis()-200){ //temp 
-        digitalWrite(40,HIGH); //relay 2 2 trappe 3
-        lock3=false;
+      if(timerLock3<millis()-10000){ //temp 
+        contLock3=contLock3+1;
+          if(contLock3 =1){
+            digitalWrite(40,HIGH); //relay 2 2 trappe 3
+            lock3=false;
+          }
       } 
     }
     
@@ -386,7 +390,6 @@ void loop(){
 
     if (alarme==true)
     {
-      digitalWrite(40,LOW); //relay 2 2 trappe 3
       
       if(timerAlarme<millis()-30000){ //temp 
         digitalWrite(39,LOW); //relay 2,1 giro
@@ -460,17 +463,49 @@ void loop(){
  Serial.println(key); // echo to computer fo debugging
 
      // lcd out 
+   if (key=='0'){
+    keyOut=0; 
+   }
+
+   if (key=='1'){
+    keyOut=1; 
+   }
+   if (key=='2'){
+    keyOut=2; 
+   }
+   if (key=='3'){
+    keyOut=3; 
+   }
+   if (key=='4'){
+    keyOut=4; 
+   }
+   if (key=='5'){
+    keyOut=5; 
+   }
+   if (key=='6'){
+    keyOut=6; 
+   }
+   if (key=='7'){
+    keyOut=7; 
+   }
+   if (key=='8'){
+    keyOut=8; 
+   }
+   if (key=='9'){
+    keyOut=9; 
+   }
+
 
    if (keyLed == 0){
 //    lc.setChar(0, 0, key, false);
-        matrix.writeDigitNum(0,key);
+        matrix.writeDigitNum(0,keyOut);
         matrix.writeDisplay();
     
    }
 
    if (keyLed == 1){
    // lc.setChar(0, 1, key, false);
-        matrix.writeDigitNum(1,key);
+        matrix.writeDigitNum(1,keyOut);
         matrix.writeDisplay();
     
    }
@@ -478,14 +513,14 @@ void loop(){
    if (keyLed == 2){
    // lc.setChar(0, 2, key, false);
 
-        matrix.writeDigitNum(4,key);
+        matrix.writeDigitNum(3,keyOut);
         matrix.writeDisplay();    
    }
 
    if (keyLed == 3){
     //lc.setChar(0, 3, key, false);
 
-        matrix.writeDigitNum(5,key);
+        matrix.writeDigitNum(4,keyOut);
         matrix.writeDisplay();    
    }
     
@@ -519,9 +554,15 @@ void loop(){
 //      lc.setChar(0, 4, ' ', false);
 //      lc.setRow(0, 2, B0111110);
 //      lc.setChar(0, 3, 'h', false);
-        matrix.writeDigitNum(0,'.');
+//        matrix.writeDigitNum(0,'.');
+        matrix.print(0xBAD, HEX);
         matrix.writeDisplay();
-
+        delay (3000);
+        matrix.writeDigitNum(0,'o');
+        matrix.writeDigitNum(1,'o');
+        matrix.writeDigitNum(3,'o');
+        matrix.writeDigitNum(4,'o');
+        matrix.writeDisplay();
       keyLed = 0;
        
      }
@@ -531,9 +572,6 @@ void loop(){
         //stage1();
         digitalWrite(30,LOW); //relay 1 serpentin 
         
-        
-        
-        cncAxisX=true;
         
         incremenEtReset();
         
@@ -560,7 +598,7 @@ void loop(){
         
         mp3_play (3);
 
-        miniNixie=50;
+        miniNixie=44;
   
        }
 
@@ -572,13 +610,15 @@ void loop(){
         digitalWrite(32,LOW); // relay 3 plasma
         //rotation serpentin 
         
+        // cncAxisX=true;
+        
         incremenEtReset();
         
         mp3_play (4);
         
         Serial.println("s4");
 
-        miniNixie=70;
+        miniNixie=58;
   
        }
        
@@ -597,7 +637,7 @@ void loop(){
         
         Serial.println("s5");
 
-        miniNixie=100;
+        miniNixie=72;
 
        }
 
@@ -616,7 +656,7 @@ void loop(){
         
         Serial.println("s6");
 
-        miniNixie=130;
+        miniNixie=86;
   
        }
 
@@ -636,7 +676,7 @@ void loop(){
         
         mp3_play (7);
 
-        miniNixie=160;
+        miniNixie=100;
 
        }
 
@@ -654,7 +694,7 @@ void loop(){
         
         mp3_play (8);
 
-        miniNixie=190;
+        miniNixie=114;
         
         }
 
@@ -673,7 +713,7 @@ void loop(){
         
         mp3_play (9);
         
-        miniNixie=220;
+        miniNixie=128;
 
         cncAxisY=true;
 
@@ -683,9 +723,11 @@ void loop(){
       //stage10
       digitalWrite(36,LOW); //relay 7 laser
       
+      timerLock3=millis();
       lock3=true; //relay 2,2 port
       
-      laserDouble=false;
+      laserDoubleStart=false;
+      
       digitalWrite(37,HIGH); //laser double
       
       digitalWrite(30,HIGH); //relay 1 serpentin 
@@ -708,6 +750,8 @@ void loop(){
       fumee=true;
       
       cncAxisY2=true;
+      
+      matrix.writeDisplay();
       
       
      }
@@ -748,14 +792,13 @@ void incremenEtReset() {
 //      lc.setChar(0, 4, ' ', false);
 //      lc.setChar(0, 2, ' ', false);
 //      lc.setChar(0, 3, ' ', false);
-  matrix.writeDigitNum(0,'.');
-  matrix.writeDigitNum(1,'.');
-  matrix.writeDigitNum(3,'.');
-  matrix.writeDigitNum(4,'.');
+matrix.writeDigitNum(0,'o');
+matrix.writeDigitNum(1,'o');
+matrix.writeDigitNum(3,'o');
+matrix.writeDigitNum(4,'o');
 
   matrix.writeDisplay();
 
       keyLed = 0;
 
 }
-
